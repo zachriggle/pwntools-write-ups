@@ -1,7 +1,7 @@
 #!/usr/bin/env python2
 # -*- coding: utf-8 -*-
 from pwn   import *
-context(arch='i386',os='linux')
+context(arch='i386',os='linux',log_level='debug')
 
 level    = 13
 host     = 'vortex.labs.overthewire.org'

