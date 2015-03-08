@@ -1,0 +1,179 @@
+<!doctype html>
+<html>
+  <head>
+    <title>
+      Fancy Cache Hint
+    </title>
+  </head>
+  <body>
+    <h1>Fancy Cache Hint</h1>
+    <p>
+    Nice job! You've gotten through the hardest part. Now that you can
+    read memory, you have everything you need to defeat ASLR. We
+    recommend the following high approach to getting a shell. We'll go
+    into more detail about each of these below.
+    </p>
+    <ol>
+      <li>Use your memory read to figure out the address of the <tt>system</tt> function</li>
+      <li>Replace <tt>memcmp</tt>'s GOT entry with system.</li>
+      <li>Trigger a call to <tt>memcmp</tt>, and make the first argument a command you want to run :-)</li>
+    </ol>
+
+    <h2>Finding the address of <tt>system</tt></h2>
+
+    <p>
+    The ultimate goal of your exploit will be to get the program to call
+    <tt>system("some command")</tt>, but in order to do that, have to
+    know where in memory <tt>system</tt> is. Since the system has ASLR
+    enabled, the location of <tt>system</tt> changes every time you run
+    it, so you'll want to leak this information from the program, then
+    use it to exploit it in the same connection.
+    </p>
+
+    <p>
+    So you got the ability to read any memory in the program - how do we
+    find <tt>system</tt> given that? To answer this, it helps to
+    understand some things how shared libraries work on Linux.
+    </p>
+
+    <h3>Shared Libraries on Linux</h3>
+
+    <p>
+    First of all, what is a shared library? You have have seen in
+    previous problems that a lot of programs call functions like
+    <tt>system</tt>, but each program doesn't define its own separate
+    version of this function - that would be a lot of redundant code!
+    </p>
+
+    <p>
+    Instead, we have a single copy of the <tt>system</tt> that all the
+    programs on the machine can share, hence a <em>shared</em> library.
+    In more detail, every time you run a program, in addition to loading
+    the program into memory, Linux also loads a shared library file into
+    memory. The libc.so.6 file in the problem description is the shared
+    library file for libc, the standard C library. This is the library
+    that contains functions such as <tt>printf</tt> and <tt>system</tt>.
+    If we can figure out where libc.so.6 is loaded in memory, then we
+    can calculate the address of <tt>system</tt>.
+    </p>
+
+    <p>
+    So you may be wondering - if libc.so.6 is loaded at some random
+    address, then how does the program know where to look when it wants
+    to call a function like <tt>memcmp</tt>?
+    </p>
+
+    <p>
+    Roughly speaking, the answer is that when the program is initially
+    loaded, the code which is doing the loading knows where the
+    libraries are loaded and writes the correct addresses into the
+    program. Specifically, the code writes the addresses into a table
+    calle the Global Offset Table, or GOT. You can see this if you
+    disassemble fancy_cache and look at the call to memcmp:
+    </p>
+
+    <pre><code>...
+8048733: e8 18 fd ff ff        call   8048450 &lt;memcmp@plt&gt;
+...</code></pre>
+
+    <p>
+    Instead of going straight to the address of memcmp in libc, the call
+    goes to 0x8048450, which looks like:
+    </p>
+
+    <pre><code>...
+08048450 &lt;memcmp@plt&gt;:
+ 8048450: ff 25 14 b0 04 08     jmp    *0x804b014
+ 8048456: 68 10 00 00 00        push   $0x10
+ 804845b: e9 c0 ff ff ff        jmp    8048420 &lt;_init+0x28&gt;
+...</code></pre>
+
+    <p>
+    0x804b014 is the address of <tt>memcmp</tt>'s entry in the GOT.
+    </p>
+
+    <p>
+    There is one extra optimization that you should be aware about.
+    Above, we said that at program load time, the loader code will fill
+    in the correct address of all library functions that the program
+    calls, but this isn't quite correct. Looking up the correct
+    addresses of all the functions is expensive if there are a lot of
+    them, and on any particular run of a program, it might only call a
+    subset of the functions that had to be looked up at start time.
+    </p>
+
+    <p>
+    To avoid this, the loader doesn't actually look up the addresses for
+    all of the libray functions at runtime. Instead, it writes the
+    address of a function that can be used to do the slow lookup of
+    where a libary function is into the program's memory. Initially, the
+    GOT entries for each library function points to some code which
+    calls this lookup function to find the library function. This
+    function also updates the GOT so that future calls to the to library
+    function don't need to relookup its location. This optimization is
+    called lazy binding. Note how it requires the GOT to be writable.
+    This will be useful later :-)
+    </p>
+
+    <p>
+    The takeaway is that once a library function has been called at
+    least once, the GOT will contain the address of the function in the
+    library. Once we have the address of one function in the library,
+    can subtract an offset (in <tt>memcmp</tt>'s case, 0x142870) to
+    figure out where the library starts in memory, and once we know
+    where the library starts, we can calculate the address of functions
+    inside the library, like <tt>system</tt>!
+    </p>
+
+    <h3>Finding where libc.so.6 is loaded</h3>
+
+    <p>
+    Try modifying your exploit to leak the value at <tt>memcmp</tt>'s
+    GOT entry (0x804b014). You should get back an address ending with
+    0x870, and subtracting 0x142870 should tell you where libc.so.6 is
+    loaded in memory (we call this the libc base address)
+    </p>
+
+    <p>
+    Notice now if you run your exploit multiple times, the address you get back
+    is different each time - that means the ASLR is working :-)
+    </p>
+
+    <h3>Calculating the address of <tt>system</tt></h3>
+    <p>
+    Now we just need to find the offset of <tt>system</tt> in libc.so.6
+    and we can calculate where <tt>system</tt> is in memory. You can get
+    this using the <tt>readelf</tt> command:
+
+    <pre>$ readelf -s libc.so.6 | grep system    
+...
+243: 00119b20    73 FUNC    GLOBAL DEFAULT   12 svcerr_systemerr@@GLIBC_2.0
+620: XXXXXXXX    56 FUNC    GLOBAL DEFAULT   12 __libc_system@@GLIBC_PRIVATE
+...</pre>
+
+   <p>
+    The Xed out value is the offset of <tt>system</tt>. Go ahead and add it to
+    the libc base address to find the address of system.
+   </p>
+
+   <h2>Replace <tt>memcmp</tt>'s GOT entry with system</h2>
+   <p>
+   Now that you know how the GOT is used, it shouldn't be too surprising
+   that overwriting the GOT entry for <tt>memcmp</tt> with the address
+   of <tt>system</tt> will cause any calls to <code>memcmp(arg1,
+   arg2)</code> to actually do <code>system(arg)</code>.
+   </p>
+   <p>
+   Try modifying your exploit so that you can write arbitrary data to an
+   arbitrary address after leaking the libc base. The technique should
+   be pretty similar to how you got the read, except with
+   <tt>CACHE_SET</tt> instead of <tt>CACHE_GET</tt> :-)
+   </p>
+
+   <h2>Trigger a call to <tt>memcmp</tt></h2>
+   <p>
+   This last part should be pretty easy :-) Make sure to put your shell
+   commands in the first argument. Awesome work - enjoy your flag!
+   </p>
+  </body>
+</html>
